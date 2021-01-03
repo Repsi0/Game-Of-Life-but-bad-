@@ -4,6 +4,22 @@ function lerp(start, end, t) {
 function clamp(val, min, max) {
 	return (val <= max ? (val >= min ? val : min) : max);
 }
+function fastConcat(a,b) {
+	let ret = a;
+	ret.push(b);
+	return ret;
+}
+class Profiler {
+	constructor(description,indentation) {
+		this.description=description;
+		this.indentation=indentation;
+		this.start = window.performance.now();
+	}
+	finish() {
+		this.elapsed = window.performance.now() - this.start;
+		console.log("\t".repeat(this.indentation) + "["+this.description+"] Elapsed: "+this.elapsed+"us");
+	}
+}
 function updateSidebar() {
 	let sidebarContainerOpenedPercentMax = 15;
 	let lerpDirection = options?0:-sidebarContainerOpenedPercentMax;

@@ -18,13 +18,19 @@ let xOff = 0, yOff = 0,
     grid = true;
 // Cells
 let alive = [];
-// Mouse
+let nxt = alive;
+// Controls
 let draggingmouse=false;
 let mbutton=-1;
 let panmode = false;
 let scrollSpeed = 0.15;
 let oldZoom = 1;
 let zoom = 1;
+let brushType = 1;
+let rotateState = 0; //0=right, 1=down, 2=left, 3=up
+// Profiling
+let startTime = new Date().getTime();
+let endTime = new Date().getTime();
 // Update loop
 let updateInterval = null
 let tps = 10;

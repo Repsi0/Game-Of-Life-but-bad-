@@ -26,6 +26,39 @@ function drawGrid(){
 	
 	screenctx.stroke();
 }
+function drawAlivePixel(x,y,t,d) {
+	screenctx.save();
+	screenctx.translate(x+xOff,y+yOff);
+	screenctx.strokeStyle = "#000000";
+	if(Math.abs(t)==1) {
+		screenctx.fillStyle = "#ffffff";
+	}
+	screenctx.fillRect(0,0,px,px);
+	if(t > 0) {
+		screenctx.lineWidth = px/10;
+		screenctx.strokeRect(0, 0,px,px);
+		screenctx.fillStyle = "#000000";
+		let arrowBodyTopLeftX = px/5;
+		let arrowBodyTopLeftY = px/2 - px/20;
+		switch(d) {
+		case 1:
+			screenctx.translate(px,0);	
+			screenctx.rotate(Math.PI/2);
+			break;
+		case 2:
+			screenctx.translate(px,px);
+			screenctx.rotate(Math.PI);
+			break;
+		case 3:
+			screenctx.translate(0,px);
+			screenctx.rotate(3*Math.PI/2);
+			break;
+		}
+		screenctx.fillRect(arrowBodyTopLeftX, arrowBodyTopLeftY, px * 3/5, px / 10);
+		fillTriangle(px/2,px/4,px/2,px*3/4,px*4/5,px/2);
+	}
+	screenctx.restore();
+}
 function loop(){
 	updateSidebar();
 	screenctx.clearRect(0, 0, screenctx.canvas.width, screenctx.canvas.height);
@@ -42,21 +75,23 @@ function loop(){
 		oldZoom = lerp(oldZoom,zoom,0.1);
 		px = 20/oldZoom;
 	}
-	screenctx.fillStyle = "#ffffff";
 	for(let i = 0; i != alive.length; i++){
 		let x = (alive[i][0]*px), y = (alive[i][1]*px);
-		if(x >= -xOff-px && x <= screenctx.canvas.width - xOff && y >= -yOff-px && y <= screenctx.canvas.height - yOff)
-			screenctx.fillRect(x + xOff, y + yOff,px,px);
+		let t = (alive[i][2]), d = (alive[i][3]);
+		if(x >= -xOff-px && x <= screenctx.canvas.width - xOff && y >= -yOff-px && y <= screenctx.canvas.height - yOff) {
+			drawAlivePixel(x,y,t,d);
+		}
 	}
 	
-	screenctx.fillStyle = "#999999";
 	if(!panmode) 
 		xOffTmp = xOff, yOffTmp = yOff, xTmp = x, yTmp = y;
 	else
 		xOff = xOffTmp - (xTmp - x), yOff = yOffTmp - (yTmp - y);
-	
+	screenctx.fillStyle = "#eeeeee";
+	screenctx.globalAlpha = 0.3;
 	screenctx.fillRect(x - ((x - xOff) % px), y - ((y - yOff) % px),px,px);
-	
+	screenctx.globalAlpha = 1.0;
+
 	screenctx.fillStyle = "#111111";
 	screenctx.globalAlpha = 0.3;
 	screenctx.fillRect(screenctx.canvas.width-265,8,192,64);

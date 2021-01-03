@@ -1,88 +1,65 @@
-function check(c){
-	let done=[[true,true,true],[true,true,true],[true,true,true]],
-	    a = [
-		[0,0,0,0,0],
-		[0,0,0,0,0],
-		[0,0,1,0,0],
-		[0,0,0,0,0],
-		[0,0,0,0,0]
-	    ];
-	
-	for(let i = 0; i != alive.length; i++){
-		if(i == c) continue;
-		let x = alive[i][0] - alive[c][0] , y = alive[i][1] - alive[c][1];
-		if(x >= -2 && x <= 2 && y >= -2 && y <= 2){
-			a[x + 2][y + 2] = 1;
-			if(i < c){
-				let j,ww,tj,tw;
-				
-				if(x < 0) tj = -1, j = 2 + x;
-				else tj = x - 1, j = 2;
-				if(y < 0) tw = -1, ww = 2 + y;
-				else tw = y - 1, ww = 2;
-				
-				for(; j != tj; j--)
-					for(let w = ww; w != tw; w--)
-						done[j][w] = false;
+function check(i) {
+	let ant = alive[i];
+	let turnDirection = -1;
+	let alreadyFound = false;
+	for(let j = 0; j != nxt.length; j++) {
+		let cell = nxt[j];
+		if(cell[0] == ant[0] && cell[1] == ant[1] && cell[2] == -ant[2]) {
+			if(!alreadyFound) {
+				turnDirection = 1;
+				nxt = nxt.slice(0,j).concat(nxt.slice(j+1,nxt.length));
+				alreadyFound=true;
+			} else {
+				nxt = nxt.slice(0,j).concat(nxt.slice(j+1,nxt.length));
 			}
 		}
 	}
-	
-	let l = [
-			[
-				a[0][0] + a[0][1] + a[0][2],
-				a[0][1] + a[0][2] + a[0][3],
-				a[0][2] + a[0][3] + a[0][4]
-			],
-			[
-				a[1][0] + a[1][1] + a[1][2],
-				a[1][1] + a[1][2] + a[1][3],
-				a[1][2] + a[1][3] + a[1][4]
-			],
-			[
-				a[2][0] + a[2][1] + a[2][2],
-				a[2][1] + a[2][2] + a[2][3],
-				a[2][2] + a[2][3] + a[2][4]
-			],
-			[
-				a[3][0] + a[3][1] + a[3][2],
-				a[3][1] + a[3][2] + a[3][3],
-				a[3][2] + a[3][3] + a[3][4]
-			],
-			[
-				a[4][0] + a[4][1] + a[4][2],
-				a[4][1] + a[4][2] + a[4][3],
-				a[4][2] + a[4][3] + a[4][4]
-			]
-		],
-	    f = [
-			[
-				l[0][0] + l[1][0] + l[2][0],
-				l[0][1] + l[1][1] + l[2][1],
-				l[0][2] + l[1][2] + l[2][2]
-			],
-			[
-				l[1][0] + l[2][0] + l[3][0],
-				l[1][1] + l[2][1] + l[3][1],
-				l[1][2] + l[2][2] + l[3][2]
-			],
-			[
-				l[2][0] + l[3][0] + l[4][0],
-				l[2][1] + l[3][1] + l[4][1],
-				l[2][2] + l[3][2] + l[4][2]
-			]
-		]
-	for(let i = 0; i != 3; i++)
-		for(let j = 0; j != 3; j++)
-			if(done[i][j] && ((f[i][j] - a[1 + i][1 + j]) == 3 || (a[1 + i][1 + j] == 1 && f[i][j] == 3)))
-				nxt.push([alive[c][0] - 1 + i, alive[c][1] - 1 + j]);
+	if(turnDirection==-1) {
+		nxt.push([Math.floor(ant[0]),Math.floor(ant[1]),-ant[2],0]);
+	}
+	return turnDirection;
+}
+function moveForward(i,turnDir) {
+	let ant = alive[i];
+	let x = ant[0], y = ant[1], t = ant[2], d = ant[3];
+	let newDir = d+turnDir;
+	d = (newDir>3)?0:((newDir<0)?3:newDir);
+	switch(d) {
+	case 0:
+		x++;break;
+	case 1:
+		y++;break;
+	case 2:
+		x--;break;
+	case 3:
+		y--;break;
+	}
+	for(let j = 0; j != nxt.length; j++) {
+		if(nxt[j]==ant) {
+			nxt = nxt.slice(0,j).concat(nxt.slice(j+1,nxt.length));
+			nxt.push([Math.floor(x),Math.floor(y),t,d]);
+			break;
+		}
+	}
 }
 function update(){
-	let startTime = new Date().getTime();
-	nxt = [];
-	for(let i = 0; i != alive.length; i++)
-		check(i);
-	alive = nxt;
-	tpsAccurate = 1000 / (new Date().getTime() - startTime);
-	tpsAccurate = (tpsAccurate > tps && tps != 0 ? tps : tpsAccurate);
+	for(let tick = 0; tick < 100; tick++) {
+		let startTime = new Date().getTime();
+		nxt = alive;
+		//let updateProfiler = new Profiler("update()",0);
+		for(let i = 0; i != alive.length; i++) {
+			if(alive[i][2] > 0) {
+				//let checkProfiler = new Profiler("check(i)",1);
+				let j = check(i);
+				//checkProfiler.finish();
+				//let moveProfiler = new Profiler("moveForward(i,j)",1);
+				moveForward(i,j);
+				//moveProfiler.finish();
+			}
+		}
+		//updateProfiler.finish();
+		alive=nxt;
+		tpsAccurate = 1000 / (new Date().getTime() - startTime);
+		tpsAccurate = (tpsAccurate > tps && tps != 0 ? tps : tpsAccurate);
+	}
 }

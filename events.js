@@ -23,7 +23,7 @@ function attemptEditGrid() {
 				for(let i = 0; i != alive.length; i++)
 					if(n && alive[i][0] == xTmp && alive[i][1] == yTmp)
 						n = false;
-				if(n) alive.push([xTmp,yTmp]);
+				if(n) alive.push([xTmp,yTmp,brushType,rotateState]);
 			break;
 			case -1:
 				draggingmouse=false;
@@ -77,6 +77,9 @@ window.addEventListener("keydown", function(e) {
 	case "F1":
 		options = !options;
 		break;
+	case "KeyR":
+		let r = rotateState+1;
+		rotateState = (r>3)?0:r;
 	}
 });
 // Mouse
